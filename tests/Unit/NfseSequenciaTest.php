@@ -20,13 +20,13 @@ class NfseSequenciaTest extends TestCase
 
     public function test_proximo_numero_para_serie_existente_incrementa(): void
     {
-        NfseSequencia::create(['serie' => '900', 'proximo_numero' => 5]);
+        NfseSequencia::create(['serie' => '901', 'proximo_numero' => 5]);
 
-        $this->assertSame(5, NfseSequencia::proximoNumeroPara('900'));
-        $this->assertSame(6, NfseSequencia::proximoNumeroPara('900'));
-        $this->assertSame(7, NfseSequencia::proximoNumeroPara('900'));
+        $this->assertSame(5, NfseSequencia::proximoNumeroPara('901'));
+        $this->assertSame(6, NfseSequencia::proximoNumeroPara('901'));
+        $this->assertSame(7, NfseSequencia::proximoNumeroPara('901'));
 
-        $this->assertDatabaseHas('nfse_sequencia', ['serie' => '900', 'proximo_numero' => 8]);
+        $this->assertDatabaseHas('nfse_sequencia', ['serie' => '901', 'proximo_numero' => 8]);
     }
 
     public function test_series_diferentes_tem_contagem_independente(): void

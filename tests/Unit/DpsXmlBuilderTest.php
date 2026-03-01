@@ -23,6 +23,13 @@ class DpsXmlBuilderTest extends TestCase
             cnae: '6201501',
             codigoTributacaoMunicipal: '01.01',
             optanteSimples: true,
+            logradouro: null,
+            numero: null,
+            bairro: null,
+            cep: null,
+            uf: null,
+            telefone: null,
+            email: null,
             certificadoCaminho: '/tmp/cert.pfx',
             certificadoSenha: 'secret'
         );

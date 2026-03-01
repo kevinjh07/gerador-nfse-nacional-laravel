@@ -126,6 +126,8 @@ class NfseApiClientTest extends TestCase
     public function test_consultar_por_id_dps_sem_url_consulta_retorna_erro(): void
     {
         config(['nfse.url_consulta' => null]);
+        putenv('NFSE_URL_CONSULTA=');
+        unset($_ENV['NFSE_URL_CONSULTA'], $_SERVER['NFSE_URL_CONSULTA']);
         $client = new NfseApiClient();
 
         $resultado = $client->consultarPorIdDps('DPS000000000000000000000000000000000000000000000001');
