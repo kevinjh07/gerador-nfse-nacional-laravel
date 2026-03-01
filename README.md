@@ -127,13 +127,12 @@ O ambiente de emissão (homologação ou produção) e as URLs são definidos vi
 
 | Variável | Descrição | Padrão |
 |---------|-----------|--------|
-| `NFSE_AMBIENTE` | `homologacao` ou `producao` | `homologacao` |
-| `NFSE_BASE_URL_HOMOLOGACAO` | URL base da API em Produção Restrita | `https://adn.producaorestrita.nfse.gov.br` |
-| `NFSE_BASE_URL_PRODUCAO` | URL base da API em Produção | `https://adn.nfse.gov.br` |
-| `NFSE_URL_EMISSAO` | URL completa de emissão (SEFIN) | `https://sefin.producaorestrita.nfse.gov.br/SefinNacional/nfse` |
+| `NFSE_AMBIENTE` | `1` = homologação, `2` = produção (valor da tag tpAmb no XML) | `1` |
+| `NFSE_BASE_URL` | URL base da API | `https://adn.producaorestrita.nfse.gov.br` |
+| `NFSE_URL_EMISSAO` | URL completa de emissão (SEFIN) | (defina no .env) |
 | `NFSE_URL_CONSULTA` | URL de consulta por idDPS | (sem padrão; defina para usar `fiscal:consultar-nota`) |
 
-Dados de empresa, cliente e serviço (prefixos `NFSE_EMPRESA_*`, `NFSE_CLIENTE_*`, `NFSE_SERVICO_*`) vêm do `.env`; veja `.env.example` para a lista completa. O sistema permanece em **homologação** (`tpAmb = 2`) por padrão. Para produção, altere `NFSE_AMBIENTE=producao` no `.env`.
+Dados de empresa, cliente e serviço (prefixos `NFSE_EMPRESA_*`, `NFSE_CLIENTE_*`, `NFSE_SERVICO_*`) vêm do `.env`; veja `.env.example` para a lista completa. O sistema usa **homologação** (`NFSE_AMBIENTE=1`) por padrão. Para produção, defina `NFSE_AMBIENTE=2` no `.env`.
 
 ## 📁 Estrutura da Solução
 

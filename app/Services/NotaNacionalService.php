@@ -50,8 +50,7 @@ class NotaNacionalService implements NfseServiceInterface
 
     private function criarDpsDTO(EmpresaDTO $empresa, ClienteDTO $cliente, ServicoDTO $servico): DpsDTO
     {
-        $ambiente = config('nfse.ambiente', 'homologacao');
-        $tpAmb = config("nfse.tpAmb.{$ambiente}", 2);
+        $tpAmb = (int) config('nfse.ambiente', 1);
 
         $identificacao = new DpsIdentificacaoDTO(
             ambiente: $tpAmb,

@@ -1,17 +1,15 @@
 <?php
 
 return [
-    'ambiente' => env('NFSE_AMBIENTE', 'homologacao'),
+    /*
+    | Ambiente NFSe: 2 = homologação, 1 = produção (valor enviado na tag tpAmb do XML).
+    */
+    'ambiente' => (int) env('NFSE_AMBIENTE', 2),
 
-    'urls' => [
-        'homologacao' => env('NFSE_BASE_URL_HOMOLOGACAO', 'https://adn.producaorestrita.nfse.gov.br'),
-        'producao' => env('NFSE_BASE_URL_PRODUCAO', 'https://adn.nfse.gov.br'),
-    ],
-
-    'tpAmb' => [
-        'homologacao' => 2,
-        'producao' => 1,
-    ],
+    /*
+    | URL base da API (uma única URL; emissão/consulta usam NFSE_URL_EMISSAO e NFSE_URL_CONSULTA).
+    */
+    'base_url' => env('NFSE_BASE_URL', 'https://adn.producaorestrita.nfse.gov.br'),
 
     /*
     | URL completa de emissão. Homologação (Produção Restrita): SEFIN Nacional (sem /API).
