@@ -19,7 +19,6 @@ class DpsXmlBuilder
         $root->setAttribute('versao', '1.01');
         $doc->appendChild($root);
 
-        // Montagem do ID rigorosa (código do município da empresa vem do .env NFSE_EMPRESA_MUNICIPIO)
         $cLocEmi = preg_replace('/[^0-9]/', '', $dps->empresa->codigoMunicipio) ?: '0000000';
         $numero = (string)(int)preg_replace('/[^0-9]/', '', $dps->identificacao->numero);
         $serie = (string)(int)preg_replace('/[^0-9]/', '', $dps->identificacao->serie);

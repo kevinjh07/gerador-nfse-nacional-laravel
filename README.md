@@ -45,7 +45,7 @@ O ambiente foi customizado via `Dockerfile` para incluir o **Composer** e as bib
     ```
     Serão criadas as tabelas `nfse_sequencia` (contador por série) e `nfse_emitidas` (histórico). A série definida em `NFSE_SERIE_DPS` no `.env` é inserida em `nfse_sequencia` com o próximo número disponível (1, ou o valor de `NFSE_NUMERO_DPS` + 1 se você definir essa variável temporariamente antes da primeira migração, para continuar de um número já usado).
 
-## 📋 Comandos Artisan (fiscal)
+## 📋 Comandos Artisan
 
 | Comando | Descrição |
 |--------|-----------|

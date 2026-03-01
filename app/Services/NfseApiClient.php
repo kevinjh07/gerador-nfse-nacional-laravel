@@ -40,7 +40,6 @@ class NfseApiClient
         }
 
         try {
-            // Sanitização antes do envio: evita falha de desserialização no servidor (RNG9999).
             $xmlAssinado = $this->sanitizarXmlParaEnvio($xmlAssinado);
 
             if (config('nfse.debug_xml', false)) {
@@ -49,7 +48,6 @@ class NfseApiClient
                 Log::info('NFSe XML enviado gravado em ' . $logPath);
             }
 
-            // SEFIN exige application/json com chave "dpsXmlGZipB64": XML compactado com GZIP e codificado em Base64.
             $xmlGz = gzencode($xmlAssinado, 9);
             $base64 = base64_encode($xmlGz);
             $bodyJson = ['dpsXmlGZipB64' => $base64];

@@ -13,7 +13,7 @@ use App\Models\NfseEmitida;
 class EmitirNota extends Command
 {
     /**
-     * Comando para emissão real de NFSe (ambiente configurado em config/nfse, padrão homologação).
+     * Comando para emissão de NFSe (ambiente configurado em config/nfse, padrão homologação).
      */
     protected $signature = 'fiscal:emitir-nota';
 
