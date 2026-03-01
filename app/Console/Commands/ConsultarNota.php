@@ -105,15 +105,60 @@ class ConsultarNota extends Command
     {
         $this->info('Consulta realizada com sucesso.');
         $this->line('---------------------------------------------');
-        $this->line('Mensagem: ' . ($resultado['mensagem'] ?? ''));
 
-        if (! empty($resultado['chave_acesso'] ?? null)) {
-            $this->line('Chave de Acesso: ' . $resultado['chave_acesso']);
+        $campos = $this->extrairCamposResposta($resultado);
+        foreach ($campos as $chave => $valor) {
+            $this->line($chave . ': ' . $valor);
         }
-        if (! empty($resultado['protocolo'] ?? null)) {
-            $this->line('Protocolo: ' . $resultado['protocolo']);
-        }
+
         $this->line('---------------------------------------------');
+    }
+
+    /**
+     * Extrai todos os campos da resposta da API em formato chave => valor (string).
+     * Se houver resposta_bruta (JSON), decodifica e exibe todos os campos; senão usa o array resultado.
+     */
+    private function extrairCamposResposta(array $resultado): array
+    {
+        $bruta = $resultado['resposta_bruta'] ?? null;
+        if ($bruta !== null && $bruta !== '') {
+            $decoded = json_decode($bruta, true);
+            if (is_array($decoded)) {
+                return $this->formatarCamposParaExibicao($decoded);
+            }
+            $xml = @simplexml_load_string($bruta);
+            if ($xml !== false) {
+                $json = json_decode(json_encode($xml), true);
+                if (is_array($json)) {
+                    return $this->formatarCamposParaExibicao($json);
+                }
+            }
+        }
+
+        return $this->formatarCamposParaExibicao($resultado);
+    }
+
+    /**
+     * Converte array em pares chave: valor (valores aninhados em JSON ou notação ponto).
+     */
+    private function formatarCamposParaExibicao(array $dados, string $prefixo = ''): array
+    {
+        $saida = [];
+        foreach ($dados as $chave => $valor) {
+            if ($chave === 'resposta_bruta' || $chave === 'nfseXmlGZipB64') {
+                continue;
+            }
+            $chaveExibir = $prefixo !== '' ? $prefixo . '.' . $chave : $chave;
+            if (is_array($valor)) {
+                $saida = array_merge(
+                    $saida,
+                    $this->formatarCamposParaExibicao($valor, $chaveExibir)
+                );
+            } else {
+                $saida[$chaveExibir] = $valor === null ? '' : (string) $valor;
+            }
+        }
+        return $saida;
     }
 
     private function exibirFalha(array $resultado): void
