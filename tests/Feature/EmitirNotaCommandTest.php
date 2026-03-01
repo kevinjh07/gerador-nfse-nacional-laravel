@@ -61,7 +61,7 @@ class EmitirNotaCommandTest extends TestCase
         putenv('NFSE_CERT_SENHA=secret');
         $_ENV['NFSE_CERT_SENHA'] = 'secret';
 
-        $this->artisan('fiscal:emitir-nota')->assertExitCode(1);
+        $this->artisan('nfse:emitir')->assertExitCode(1);
     }
 
     public function test_sem_nfse_cert_senha_retorna_erro(): void
@@ -69,7 +69,7 @@ class EmitirNotaCommandTest extends TestCase
         $this->limparEnv('NFSE_CERT_SENHA');
         putenv('NFSE_CERT_SENHA=');
 
-        $this->artisan('fiscal:emitir-nota')->assertExitCode(1);
+        $this->artisan('nfse:emitir')->assertExitCode(1);
     }
 
     public function test_sem_variavel_obrigatoria_cliente_retorna_erro(): void
@@ -77,7 +77,7 @@ class EmitirNotaCommandTest extends TestCase
         $this->limparEnv('NFSE_CLIENTE_NOME');
         putenv('NFSE_CLIENTE_NOME=');
 
-        $this->artisan('fiscal:emitir-nota')->assertExitCode(1);
+        $this->artisan('nfse:emitir')->assertExitCode(1);
     }
 
     private function limparEnv(string $key): void
@@ -104,7 +104,7 @@ class EmitirNotaCommandTest extends TestCase
                 ]);
         });
 
-        $this->artisan('fiscal:emitir-nota')->assertExitCode(0);
+        $this->artisan('nfse:emitir')->assertExitCode(0);
 
         $this->assertDatabaseHas('nfse_emitidas', ['numero' => 1, 'serie' => '900', 'chave_acesso' => 'CHAVE123']);
     }
@@ -121,7 +121,7 @@ class EmitirNotaCommandTest extends TestCase
                 ]);
         });
 
-        $this->artisan('fiscal:emitir-nota')->assertExitCode(0);
+        $this->artisan('nfse:emitir')->assertExitCode(0);
 
         $this->assertDatabaseCount('nfse_emitidas', 0);
     }
@@ -146,6 +146,6 @@ class EmitirNotaCommandTest extends TestCase
                 ->andReturn(['sucesso' => true, 'mensagem' => 'OK', 'id_dps' => 'DPS001', 'numero' => 3, 'serie' => '901', 'data_emissao' => new \DateTime, 'competencia' => date('Y-m-d')]);
         });
 
-        $this->artisan('fiscal:emitir-nota')->assertExitCode(0);
+        $this->artisan('nfse:emitir')->assertExitCode(0);
     }
 }

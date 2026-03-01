@@ -49,24 +49,24 @@ O ambiente foi customizado via `Dockerfile` para incluir o **Composer** e as bib
 
 | Comando | Descrição |
 |--------|-----------|
-| `fiscal:emitir-nota` | Emite NFSe Nacional (homologação por padrão). Gera DPS em XML, assina e envia à API SEFIN. |
-| `fiscal:consultar-nota [valor]` | Consulta NFSe por **idDPS** (começa com `DPS`) ou por **chave de acesso** (só dígitos). Auto-detecta o tipo. Opções: `--chave=` e `--id=` para forçar o modo. |
+| `nfse:emitir` | Emite NFSe Nacional (homologação por padrão). Gera DPS em XML, assina e envia à API SEFIN. |
+| `nfse:consultar [valor]` | Consulta NFSe por **idDPS** (começa com `DPS`) ou por **chave de acesso** (só dígitos). Auto-detecta o tipo. Opções: `--chave=` e `--id=` para forçar o modo. |
 
 **Exemplos com Docker:**
 
 ```bash
 # Emitir nota
-docker compose exec app php artisan fiscal:emitir-nota
+docker compose exec app php artisan nfse:emitir
 
 # Consultar por idDPS (argumento posicional; use o id retornado na emissão)
-docker compose exec app php artisan fiscal:consultar-nota DPS000000000000000000000000000000000000000000000001
+docker compose exec app php artisan nfse:consultar DPS000000000000000000000000000000000000000000000001
 
 # Consultar por chave de acesso (argumento posicional; auto-detecta)
-docker compose exec app php artisan fiscal:consultar-nota 00000000000000000000000000000000000000000000000000
+docker compose exec app php artisan nfse:consultar 00000000000000000000000000000000000000000000000000
 
 # Forçar consulta por chave ou por id
-docker compose exec app php artisan fiscal:consultar-nota --chave=00000000000000000000000000000000...
-docker compose exec app php artisan fiscal:consultar-nota --id=DPS0000000...
+docker compose exec app php artisan nfse:consultar --chave=00000000000000000000000000000000...
+docker compose exec app php artisan nfse:consultar --id=DPS0000000...
 ```
 
 ## 📤 Emissão (homologação)
@@ -94,14 +94,14 @@ Para emitir NFSe no ambiente de homologação, todos os dados vêm do `.env` (co
 
 3. **Rode o comando dentro do container:**
    ```bash
-   docker compose exec app php artisan fiscal:emitir-nota
+   docker compose exec app php artisan nfse:emitir
    ```
 
 *Caminho em `NFSE_CERT_CAMINHO` pode ser relativo ao projeto (ex.: `storage/app/certificados/cert.pfx`) ou absoluto. Dentro do Docker o working dir é `/var/www/html`, então o relativo é resolvido corretamente.*
 
 **Certificado para emissão:** só o **.pfx** é obrigatório (`NFSE_CERT_CAMINHO` + `NFSE_CERT_SENHA`). Ele é usado para assinar o XML da DPS e para mTLS na chamada à API (extração em tempo de execução).
 
-**Banco de dados e sequência da DPS:** a emissão usa as tabelas `nfse_sequencia` e `nfse_emitidas`. O comando `fiscal:emitir-nota` obtém o próximo número da DPS (por série) em transação com lock, emite a nota e, em caso de sucesso, grava o registro em `nfse_emitidas` (id_dps, chave_acesso, protocolo, dados do prestador/tomador/serviço). Não é necessário configurar número da DPS no `.env`; a série continua em `NFSE_SERIE_DPS` (ex.: 900 para homologação).
+**Banco de dados e sequência da DPS:** a emissão usa as tabelas `nfse_sequencia` e `nfse_emitidas`. O comando `nfse:emitir` obtém o próximo número da DPS (por série) em transação com lock, emite a nota e, em caso de sucesso, grava o registro em `nfse_emitidas` (id_dps, chave_acesso, protocolo, dados do prestador/tomador/serviço). Não é necessário configurar número da DPS no `.env`; a série continua em `NFSE_SERIE_DPS` (ex.: 900 para homologação).
 
 ### Consulta por idDPS ou por chave de acesso
 
@@ -110,7 +110,7 @@ Após um envio (ou timeout), é possível consultar se a DPS já foi processada 
 - **Por idDPS:** atributo `Id` do elemento `infDPS` no XML. Endpoint: `GET {NFSE_URL_CONSULTA}?idDPS=...`
 - **Por chave de acesso:** chave numérica da NFSe. Endpoint: `GET {NFSE_URL_EMISSAO}/{chaveAcesso}` (conforme documentação SEFIN Nacional)
 
-1. **Configure no `.env`** as URLs (emissão já usada pelo `fiscal:emitir-nota`; consulta por idDPS usa a URL de consulta). O `.env.example` já traz os padrões de homologação:
+1. **Configure no `.env`** as URLs (emissão já usada pelo `nfse:emitir`; consulta por idDPS usa a URL de consulta). O `.env.example` já traz os padrões de homologação:
    ```env
    NFSE_URL_EMISSAO=https://sefin.producaorestrita.nfse.gov.br/SefinNacional/nfse
    NFSE_URL_CONSULTA=https://sefin.producaorestrita.nfse.gov.br/SefinNacional/consulta
@@ -118,8 +118,8 @@ Após um envio (ou timeout), é possível consultar se a DPS já foi processada 
 
 2. **Execute** (substitua pelo idDPS ou pela chave da sua NFSe):
    ```bash
-   docker compose exec app php artisan fiscal:consultar-nota DPS000000000000000000000000000000000000000000000001
-   docker compose exec app php artisan fiscal:consultar-nota 00000000000000000000000000000000000000000000000000
+   docker compose exec app php artisan nfse:consultar DPS000000000000000000000000000000000000000000000001
+   docker compose exec app php artisan nfse:consultar 00000000000000000000000000000000000000000000000000
    ```
 
 O comando usa o mesmo mTLS (cert/key) e timeout de 60 segundos. Se a URL necessária não estiver definida, o comando informa e orienta a configurar.
@@ -128,7 +128,7 @@ O comando usa o mesmo mTLS (cert/key) e timeout de 60 segundos. Se a URL necess�
 
 **Se retornar E4007 ("Não foi possível obter o certificado de cliente"):** testes com curl (usando os PEM de `NFSE_DEBUG_MTLS=true`) mostram que o **handshake TLS completa** — o certificado é enviado. Mesmo assim a aplicação da API (IIS/ASP.NET) responde 403 com E4007. Conclusão: **restrição no ambiente de homologação** (a API pode exigir que o certificado esteja cadastrado/habilitado para uso via API, ou há whitelist). O mesmo certificado que funciona no login do [Emissor Nacional Web](https://www.nfse.gov.br/EmissorNacional/) pode não estar autorizado para a API. Próximos passos: consultar a documentação oficial ou o suporte do Sistema Nacional NFSe sobre E4007 e requisitos de certificado para integração via API em produção restrita.
 
-**Fluxo do comando `fiscal:emitir-nota`:** obtém o próximo número da DPS para a série (`NfseSequencia`, com lock), monta os DTOs a partir do `.env` (`EmpresaDTO`, `ClienteDTO`, `ServicoDTO`), constrói o `DpsDTO`, gera o XML da DPS (`DpsXmlBuilder`), assina com o certificado A1 e envia à API SEFIN via mTLS. Em caso de sucesso, persiste o registro em `nfse_emitidas`. Os campos do XML seguem o leiaute da NFSe Nacional (`tpAmb`, `dhEmi`, `infDPS`, `prest`, `toma`, `serv`, `valores`).
+**Fluxo do comando `nfse:emitir`:** obtém o próximo número da DPS para a série (`NfseSequencia`, com lock), monta os DTOs a partir do `.env` (`EmpresaDTO`, `ClienteDTO`, `ServicoDTO`), constrói o `DpsDTO`, gera o XML da DPS (`DpsXmlBuilder`), assina com o certificado A1 e envia à API SEFIN via mTLS. Em caso de sucesso, persiste o registro em `nfse_emitidas`. Os campos do XML seguem o leiaute da NFSe Nacional (`tpAmb`, `dhEmi`, `infDPS`, `prest`, `toma`, `serv`, `valores`).
 
 ### Parametrização de ambiente NFSe
 
@@ -139,7 +139,7 @@ O ambiente de emissão (homologação ou produção) e as URLs são definidos vi
 | `NFSE_AMBIENTE` | `2` = homologação, `1` = produção (valor da tag tpAmb no XML) | `1` |
 | `NFSE_BASE_URL` | URL base da API | `https://adn.producaorestrita.nfse.gov.br` |
 | `NFSE_URL_EMISSAO` | URL completa de emissão (SEFIN) | (defina no .env) |
-| `NFSE_URL_CONSULTA` | URL de consulta por idDPS | (sem padrão; defina para usar `fiscal:consultar-nota`) |
+| `NFSE_URL_CONSULTA` | URL de consulta por idDPS | (sem padrão; defina para usar `nfse:consultar`) |
 | `NFSE_SERIE_DPS` | Série da nota (ex.: 900 homologação, 1 produção). O próximo número é obtido do banco por série. | `900` |
 
 Dados de empresa, cliente e serviço (prefixos `NFSE_EMPRESA_*`, `NFSE_CLIENTE_*`, `NFSE_SERVICO_*`) vêm do `.env`; veja `.env.example` para a lista completa. O sistema usa **homologação** (`NFSE_AMBIENTE=2`) por padrão. Para produção, defina `NFSE_AMBIENTE=1` no `.env`.

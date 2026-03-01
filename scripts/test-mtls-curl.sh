@@ -7,7 +7,7 @@ KEY="/var/www/html/storage/app/mtls-debug-key.pem"
 URL="https://sefin.producaorestrita.nfse.gov.br/API/SefinNacional/nfse"
 
 if [ ! -f "$CERT" ] || [ ! -f "$KEY" ]; then
-  echo "Arquivos PEM nao encontrados. Rode antes: NFSE_DEBUG_MTLS=true e php artisan fiscal:emitir-nota"
+  echo "Arquivos PEM nao encontrados. Rode antes: NFSE_DEBUG_MTLS=true e php artisan nfse:emitir"
   exit 1
 fi
 

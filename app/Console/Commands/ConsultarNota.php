@@ -7,7 +7,7 @@ use App\Services\NfseApiClient;
 
 class ConsultarNota extends Command
 {
-    protected $signature = 'fiscal:consultar-nota
+    protected $signature = 'nfse:consultar
                             {valor? : idDPS (começa com DPS) ou chave de acesso (só dígitos)}
                             {--chave= : Força consulta por chave de acesso}
                             {--id= : Força consulta por idDPS}';
@@ -62,10 +62,10 @@ class ConsultarNota extends Command
     private function exibirExemplosUso(): void
     {
         $this->line('Exemplos:');
-        $this->line('  php artisan fiscal:consultar-nota DPS000000000000000000000000000000000000000000000001');
-        $this->line('  php artisan fiscal:consultar-nota 00000000000000000000000000000000000000000000000000');
-        $this->line('  php artisan fiscal:consultar-nota --chave=00000000000000000000000000000000...');
-        $this->line('  php artisan fiscal:consultar-nota --id=DPS0000000...');
+        $this->line('  php artisan nfse:consultar DPS000000000000000000000000000000000000000000000001');
+        $this->line('  php artisan nfse:consultar 00000000000000000000000000000000000000000000000000');
+        $this->line('  php artisan nfse:consultar --chave=00000000000000000000000000000000...');
+        $this->line('  php artisan nfse:consultar --id=DPS0000000...');
     }
 
     /**
