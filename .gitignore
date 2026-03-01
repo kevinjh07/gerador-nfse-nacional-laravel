@@ -1,0 +1,27 @@
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+.env
+.env.backup
+.env.production
+composer.lock (opcional, mas para PoC pode ignorar se quiser)
+package-lock.json
+/public/hot
+/public/storage
+.cursorrules
+
+# --- Docker ---
+.docker/
+mysql_data/
+*.pfx
+*.p12
+*.pem
+*.crt
+*.key
+/storage/app/certificados/*
+!/storage/app/certificados/.gitignore
