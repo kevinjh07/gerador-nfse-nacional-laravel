@@ -7,6 +7,8 @@ use App\Services\NotaNacionalService;
 use App\Services\DTOs\EmpresaDTO;
 use App\Services\DTOs\ClienteDTO;
 use App\Services\DTOs\ServicoDTO;
+use App\Models\NfseSequencia;
+use App\Models\NfseEmitida;
 
 class EmitirNota extends Command
 {
@@ -100,9 +102,27 @@ class EmitirNota extends Command
                 : 1.00
         );
 
-        $resultado = $service->emitirNota($empresa, $cliente, $servico);
+        $serie = (string) (env('NFSE_SERIE_DPS', '900') ?: '900');
+        $numero = NfseSequencia::proximoNumeroPara($serie);
+        $resultado = $service->emitirNota($empresa, $cliente, $servico, (string) $numero, $serie);
 
         if ($resultado['sucesso'] ?? false) {
+            NfseEmitida::create([
+                'numero' => $resultado['numero'],
+                'serie' => $resultado['serie'],
+                'id_dps' => $resultado['id_dps'],
+                'chave_acesso' => $resultado['chave_acesso'] ?? null,
+                'protocolo' => $resultado['protocolo'] ?? null,
+                'ambiente' => (int) config('nfse.ambiente', 1),
+                'data_emissao' => $resultado['data_emissao'],
+                'competencia' => $resultado['competencia'],
+                'valor_servico' => $servico->valorServicos,
+                'prestador_cnpj' => preg_replace('/[^0-9]/', '', $empresa->cnpj),
+                'tomador_documento' => preg_replace('/[^0-9]/', '', $cliente->documento),
+                'tomador_nome' => $cliente->nome,
+                'descricao_servico' => $servico->descricao,
+            ]);
+
             $this->info('NFSe emitida com sucesso!');
             $this->line('---------------------------------------------');
             $this->line('Mensagem: ' . ($resultado['mensagem'] ?? ''));

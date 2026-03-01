@@ -14,12 +14,13 @@ class NotaNacionalService implements NfseServiceInterface
 {
     /**
      * Emissão real de NFSe: gera XML da DPS, assina com A1 e envia via mTLS (ambiente em config/nfse).
+     * Retorna em caso de sucesso: chave_acesso, protocolo, id_dps, numero, serie, data_emissao, competencia.
      */
-    public function emitirNota(EmpresaDTO $empresa, ClienteDTO $cliente, ServicoDTO $servico): array
+    public function emitirNota(EmpresaDTO $empresa, ClienteDTO $cliente, ServicoDTO $servico, string $numero, string $serie): array
     {
         try {
             $cert = $this->carregarCertificado($empresa);
-            $dps = $this->criarDpsDTO($empresa, $cliente, $servico);
+            $dps = $this->criarDpsDTO($empresa, $cliente, $servico, $numero, $serie);
             $this->validarDps($dps, $cert);
 
             $xmlBuilder = new DpsXmlBuilder();
@@ -29,7 +30,17 @@ class NotaNacionalService implements NfseServiceInterface
             $xmlAssinado = $signer->sign($xml, $cert);
 
             $apiClient = new NfseApiClient();
-            return $apiClient->emitirDpsHomologacao($xmlAssinado);
+            $resultado = $apiClient->emitirDpsHomologacao($xmlAssinado);
+
+            if ($resultado['sucesso'] ?? false) {
+                $resultado['id_dps'] = $this->buildIdDps($dps);
+                $resultado['numero'] = (int) preg_replace('/[^0-9]/', '', $dps->identificacao->numero);
+                $resultado['serie'] = $serie;
+                $resultado['data_emissao'] = $dps->identificacao->dataHoraEmissao;
+                $resultado['competencia'] = $dps->identificacao->dataHoraEmissao->format('Y-m-d');
+            }
+
+            return $resultado;
         } catch (\Exception $e) {
             return [
                 'sucesso' => false,
@@ -48,14 +59,14 @@ class NotaNacionalService implements NfseServiceInterface
         return Certificate::readPfx($content, $empresa->certificadoSenha);
     }
 
-    private function criarDpsDTO(EmpresaDTO $empresa, ClienteDTO $cliente, ServicoDTO $servico): DpsDTO
+    private function criarDpsDTO(EmpresaDTO $empresa, ClienteDTO $cliente, ServicoDTO $servico, string $numero, string $serie): DpsDTO
     {
         $tpAmb = (int) config('nfse.ambiente', 1);
 
         $identificacao = new DpsIdentificacaoDTO(
             ambiente: $tpAmb,
-            numero: (string) (env('NFSE_NUMERO_DPS', '71') ?: '71'),
-            serie: (string) (env('NFSE_SERIE_DPS', '900') ?: '900'),
+            numero: $numero,
+            serie: $serie,
             tipo: 'DPS',
             naturezaOperacao: '1',
             dataHoraEmissao: now(),
@@ -68,6 +79,16 @@ class NotaNacionalService implements NfseServiceInterface
             cliente: $cliente,
             servico: $servico,
         );
+    }
+
+    private function buildIdDps(DpsDTO $dps): string
+    {
+        $cLocEmi = preg_replace('/[^0-9]/', '', $dps->empresa->codigoMunicipio) ?: '0000000';
+        $numero = (string) (int) preg_replace('/[^0-9]/', '', $dps->identificacao->numero);
+        $serie = (string) (int) preg_replace('/[^0-9]/', '', $dps->identificacao->serie);
+        return 'DPS' . $cLocEmi . $dps->identificacao->ambiente .
+            str_pad(preg_replace('/[^0-9]/', '', $dps->empresa->cnpj), 14, '0', STR_PAD_LEFT) .
+            sprintf('%05d', $serie) . sprintf('%015d', $numero);
     }
 
     private function validarDps(DpsDTO $dps, Certificate $certificado): void
