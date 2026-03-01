@@ -25,3 +25,4 @@ mysql_data/
 *.key
 /storage/app/certificados/*
 !/storage/app/certificados/.gitignore
+.phpunit.result.cache

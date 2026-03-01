@@ -52,9 +52,6 @@ class EmitirNota extends Command
         return 0;
     }
 
-    /**
-     * Valida certificado e variáveis obrigatórias do .env. Retorna 1 em caso de erro, null se ok.
-     */
     private function validarConfiguracao(): ?int
     {
         $caminho = env('NFSE_CERT_CAMINHO');
