@@ -69,6 +69,42 @@ docker compose exec app php artisan nfse:consultar --chave=000000000000000000000
 docker compose exec app php artisan nfse:consultar --id=DPS0000000...
 ```
 
+## 🧪 Testes unitários
+
+Os testes usam PHPUnit com SQLite em memória (configurado em `phpunit.xml`). Rode-os **dentro do container** para garantir o mesmo ambiente (PHP, extensões, `vendor`).
+
+**Executar toda a suíte:**
+
+```bash
+docker compose exec app php vendor/bin/phpunit
+```
+
+**Apenas testes unitários:**
+
+```bash
+docker compose exec app php vendor/bin/phpunit tests/Unit
+```
+
+**Apenas testes de feature (comandos):**
+
+```bash
+docker compose exec app php vendor/bin/phpunit tests/Feature
+```
+
+**Com relatório de cobertura (texto no terminal):**
+
+```bash
+docker compose exec app php vendor/bin/phpunit --coverage-text
+```
+
+**Com relatório de cobertura em HTML** (a pasta `coverage/` é criada no projeto e pode ser aberta no navegador):
+
+```bash
+docker compose exec app php vendor/bin/phpunit --coverage-html coverage
+```
+
+Antes de rodar os testes, certifique-se de que as migrações foram executadas (`php artisan migrate`), pois alguns testes usam `RefreshDatabase` e as tabelas `nfse_sequencia` e `nfse_emitidas`.
+
 ## 📤 Emissão (homologação)
 
 Para emitir NFSe no ambiente de homologação, todos os dados vêm do `.env` (copie de `.env.example` e preencha):
